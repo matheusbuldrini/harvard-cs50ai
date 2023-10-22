@@ -122,7 +122,6 @@ class CrosswordCreator():
                 found = False
                 for wordY in self.domains[y]:
                     if len(wordX) > overlap[0] and len(wordY) > overlap[1] and wordX[overlap[0]] == wordY[overlap[1]]:
-                        # print(f"Found {wordY} such that wordX[{overlap[0]}] == wordY[{overlap[1]}], {wordX[overlap[0]]} == {wordY[overlap[1]]}, wordX: {wordX}")
                         found = True
                 
                 if not found:
@@ -180,13 +179,11 @@ class CrosswordCreator():
         
         # check for duplicates
         if len(assignment.values()) != len(set(assignment.values())):
-            # print(f"duplicate")
             return False
 
         # check correct length
         for var, word in assignment.items():
             if len(word) != var.length:
-                # print(f"len(word) != var.length - len({word}) != {var.length}")
                 return False
             
         # check conflicts between neighboring variables
@@ -196,7 +193,6 @@ class CrosswordCreator():
                     overlap = self.crossword.overlaps[var1, var2] 
                     if overlap is not None:
                         if word1[overlap[0]] != word2[overlap[1]]:
-                            # print(f"word1[overlap[0]] != word2[overlap[1]] - word1[{overlap[0]} != word2[{overlap[1]}]")
                             return False
         
         return True
