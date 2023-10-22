@@ -205,8 +205,17 @@ class CrosswordCreator():
         
         return True
 
-
-
+    def number_of_values_ruled_out_for_neighboring_variables(self, var, selected_value, already_assigned_vars):
+        count = 0
+        for nb_var in self.crossword.neighbors(var):
+            if nb_var not in already_assigned_vars:
+                overlap = self.crossword.overlaps[nb_var, var] 
+                for value in self.domains[nb_var]:
+                    if overlap is not None:  # value incompatible with selected_value:
+                        if value[overlap[0]] != selected_value[overlap[1]]:
+                            count += 1
+        return count
+    
     def order_domain_values(self, var, assignment):
         """
         Return a list of values in the domain of `var`, in order by
@@ -214,7 +223,14 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        return list(self.domains[var]) # TODO sort this
+        already_assigned_vars = set()
+        for variable, value in assignment.items():
+            if value != None:
+                already_assigned_vars.add(variable)
+
+        domain_values = list(self.domains[var])
+        domain_values.sort(key= lambda x: self.number_of_values_ruled_out_for_neighboring_variables(var, x, already_assigned_vars))
+        return domain_values
 
     def select_unassigned_variable(self, assignment):
         """
@@ -241,7 +257,7 @@ class CrosswordCreator():
 
         If no assignment is possible, return None.
         """
-        if len(assignment) == 0: # initialize assignment with None
+        if len(assignment) == 0:  # initialize assignment with None
             for v in self.crossword.variables:
                 assignment[v] = None
 
@@ -249,7 +265,8 @@ class CrosswordCreator():
             return assignment
         
         var = self.select_unassigned_variable(assignment)
-        for value in self.domains[var]:
+        ordered = self.order_domain_values(var, assignment)
+        for value in ordered:
             if self.is_value_consistent_with_assignment(var, value, assignment):
                 assignment[var] = value
                 result = self.backtrack(assignment)
