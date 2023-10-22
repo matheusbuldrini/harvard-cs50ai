@@ -169,7 +169,7 @@ class CrosswordCreator():
         crossword variable); return False otherwise.
         """
         for word in assignment.values():
-            if word is None or len(word) == 0:
+            if word is None:
                 return False
         return True            
 
@@ -214,7 +214,7 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        raise NotImplementedError
+        return list(self.domains[var]) # TODO sort this
 
     def select_unassigned_variable(self, assignment):
         """
@@ -224,7 +224,9 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
-        raise NotImplementedError
+        for var, word in assignment.items(): # TODO sort this
+            if word is None:
+                return var
 
     def backtrack(self, assignment):
         """
@@ -235,8 +237,38 @@ class CrosswordCreator():
 
         If no assignment is possible, return None.
         """
-        raise NotImplementedError
+        if len(assignment) == 0: # initialize assignment with None
+            for v in self.crossword.variables:
+                assignment[v] = None
 
+        if self.assignment_complete(assignment):
+            return assignment
+        
+        var = self.select_unassigned_variable(assignment)
+        for value in self.domains[var]:
+            if self.is_value_consistent_with_assignment(var, value, assignment):
+                assignment[var] = value
+                result = self.backtrack(assignment)
+                if result is not None:
+                    return result
+                assignment[var] = None
+
+        return None
+
+    def is_value_consistent_with_assignment(self, var, value, assignment):
+        """
+        Checks if value for var is consistent with assignment
+        """
+        aux_assignment = assignment.copy()
+
+        # remove unassigned vars
+        for v, w in assignment.items():
+            if w == None:
+                aux_assignment.pop(v)
+
+        aux_assignment[var] = value
+
+        return self.consistent(aux_assignment)
 
 def main():
 
