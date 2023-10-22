@@ -1,3 +1,4 @@
+from queue import Queue
 import sys
 
 from crossword import *
@@ -117,16 +118,17 @@ class CrosswordCreator():
         revised = False
         for wordX in self.domains[x].copy():
             overlap = self.crossword.overlaps[x, y]
-            if overlap is None:
-                # print("overlap is None")
-                continue
-            # find wordY in Ydomain such that wordX[overlap.Xposition] == wordY[overlap.Yposition]
-            for wordY in self.domains[y]:
-                if len(wordX) > overlap[0] and len(wordY) > overlap[1] and wordX[overlap[0]] == wordY[overlap[1]]:
-                    continue
-            #print(f"Removing {wordX} because wordX[{overlap[0]}] != wordY[{overlap[1]}], {wordX[overlap[0]]} != {wordY[overlap[1]]} wordY: {wordY}")
-            self.domains[x].remove(wordX)
-            revised = True
+            if overlap is not None:
+                # find wordY in Ydomain such that wordX[overlap.Xposition] == wordY[overlap.Yposition]
+                found = False
+                for wordY in self.domains[y]:
+                    if len(wordX) > overlap[0] and len(wordY) > overlap[1] and wordX[overlap[0]] == wordY[overlap[1]]:
+                        # print(f"Found {wordY} such that wordX[{overlap[0]}] == wordY[{overlap[1]}], {wordX[overlap[0]]} == {wordY[overlap[1]]}, wordX: {wordX}")
+                        found = True
+                
+                if not found:
+                    self.domains[x].remove(wordX)
+                    revised = True
         
         return revised
                 
@@ -140,7 +142,26 @@ class CrosswordCreator():
         Return True if arc consistency is enforced and no domains are empty;
         return False if one or more domains end up empty.
         """
-        raise NotImplementedError
+        if arcs is None:
+            queue = Queue()
+            for v1 in self.crossword.variables:
+                for v2 in self.crossword.neighbors(v1):
+                    if v1 != v2:
+                        queue.put((v1, v2))
+        else:
+            queue = arcs
+        
+        while not queue.empty():
+            X, Y = queue.get()
+            if self.revise(X, Y):
+                if len(self.domains[X]) == 0:
+                    return False
+                for Z in self.crossword.neighbors(X):
+                    if Z != Y:
+                        queue.put((Z, X))
+
+        return True
+
 
     def assignment_complete(self, assignment):
         """
