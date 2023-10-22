@@ -104,7 +104,6 @@ class CrosswordCreator():
             for x in domain.copy():
                 if len(x) != variable.length:
                     self.domains[variable].remove(x)
-        
 
     def revise(self, x, y):
         """
@@ -132,7 +131,6 @@ class CrosswordCreator():
         
         return revised
                 
-
     def ac3(self, arcs=None):
         """
         Update `self.domains` such that each variable is arc consistent.
@@ -159,9 +157,7 @@ class CrosswordCreator():
                 for Z in self.crossword.neighbors(X):
                     if Z != Y:
                         queue.put((Z, X))
-
         return True
-
 
     def assignment_complete(self, assignment):
         """
@@ -206,6 +202,9 @@ class CrosswordCreator():
         return True
 
     def number_of_values_ruled_out_for_neighboring_variables(self, var, selected_value, already_assigned_vars):
+        """
+        Calculates the number of values ruled out from neighboring variables given that selected_value was chosen for var.
+        """
         count = 0
         for nb_var in self.crossword.neighbors(var):
             if nb_var not in already_assigned_vars:
@@ -229,7 +228,7 @@ class CrosswordCreator():
                 already_assigned_vars.add(variable)
 
         domain_values = list(self.domains[var])
-        domain_values.sort(key= lambda x: self.number_of_values_ruled_out_for_neighboring_variables(var, x, already_assigned_vars))
+        domain_values.sort(key=lambda x: self.number_of_values_ruled_out_for_neighboring_variables(var, x, already_assigned_vars))
         return domain_values
 
     def select_unassigned_variable(self, assignment):
@@ -245,7 +244,7 @@ class CrosswordCreator():
             if word is None:
                 unassigned.append(var)
 
-        unassigned.sort(key= lambda v: (len(self.domains[v]), -len(self.crossword.neighbors(v))))
+        unassigned.sort(key=lambda v: (len(self.domains[v]), -len(self.crossword.neighbors(v))))
         return unassigned[0]
 
     def backtrack(self, assignment):
@@ -290,6 +289,7 @@ class CrosswordCreator():
         aux_assignment[var] = value
 
         return self.consistent(aux_assignment)
+
 
 def main():
 
