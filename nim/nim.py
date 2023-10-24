@@ -101,7 +101,8 @@ class NimAI():
         Return the Q-value for the state `state` and the action `action`.
         If no Q-value exists yet in `self.q`, return 0.
         """
-        raise NotImplementedError
+        _state = tuple(state)
+        return self.q[(_state, action)] if (_state, action) in self.q.keys() else 0
 
     def update_q_value(self, state, action, old_q, reward, future_rewards):
         """
@@ -118,7 +119,8 @@ class NimAI():
         `alpha` is the learning rate, and `new value estimate`
         is the sum of the current reward and estimated future rewards.
         """
-        raise NotImplementedError
+        _state = tuple(state)
+        self.q[(_state, action)] = old_q + self.alpha * (reward + future_rewards - old_q)
 
     def best_future_reward(self, state):
         """
@@ -130,7 +132,20 @@ class NimAI():
         Q-value in `self.q`. If there are no available actions in
         `state`, return 0.
         """
-        raise NotImplementedError
+        if len(Nim.available_actions(state)) == 0:
+            return 0
+        
+        _state = tuple(state)
+        max = -math.inf
+        
+        for action in Nim.available_actions(state):
+            if (_state, action) in self.q:
+                if self.q[(_state, action)] > max:
+                    max = self.q[(_state, action)]
+            else:
+                if 0 > max:
+                    max = 0
+        return max 
 
     def choose_action(self, state, epsilon=True):
         """
@@ -147,7 +162,25 @@ class NimAI():
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
         """
-        raise NotImplementedError
+        _state = tuple(state)
+
+        if epsilon and self.epsilon > random.random():
+            return random.choice(list(Nim.available_actions(state)))
+     
+        max_action = None
+        max = -math.inf
+        
+        for action in Nim.available_actions(state):
+            if (_state, action) in self.q:
+                if self.q[(_state, action)] > max:
+                    max = self.q[(_state, action)]
+                    max_action = action
+            else:
+                if 0 > max:
+                    max = 0
+                    max_action = action
+
+        return max_action
 
 
 def train(n):
