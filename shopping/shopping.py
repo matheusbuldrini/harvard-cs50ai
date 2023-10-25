@@ -85,6 +85,7 @@ def load_data(filename):
             evidences.append(parse_visitor_type(columns[15]))
             evidences.append(parse_bool(columns[16]))
             
+            # append to final lists
             evidence.append(evidences)
             labels.append(parse_bool(columns[17]))
     
@@ -92,6 +93,9 @@ def load_data(filename):
 
 
 def parse_month(month_str):
+    """
+    Converts from string Month to 0-11
+    """
     match month_str:
         case "Jan": return 0
         case "Feb": return 1
@@ -109,10 +113,16 @@ def parse_month(month_str):
 
 
 def parse_visitor_type(visitor_type_str):
+    """
+    Converts from Returning_Visitor or New_Visitor into 1 or 0
+    """
     return 1 if visitor_type_str == "Returning_Visitor" else 0
 
 
 def parse_bool(bool_str):
+    """
+    Converts from TRUE or FALSE into 1 or 0 
+    """
     return 1 if bool_str == "TRUE" else 0
 
 
@@ -121,7 +131,8 @@ def train_model(evidence, labels):
     Given a list of evidence lists and a list of labels, return a
     fitted k-nearest neighbor model (k=1) trained on the data.
     """
-    raise NotImplementedError
+    model = KNeighborsClassifier(n_neighbors=1)
+    return model.fit(evidence, labels)
 
 
 def evaluate(labels, predictions):
@@ -139,8 +150,23 @@ def evaluate(labels, predictions):
     representing the "true negative rate": the proportion of
     actual negative labels that were accurately identified.
     """
-    raise NotImplementedError
+    bought = 0
+    bought_and_identified = 0
+    not_bought = 0
+    not_bought_and_identified = 0
 
+    for label, prediction in zip(labels, predictions):
+        if label == 1:
+            bought += 1
+            if prediction == 1:
+                bought_and_identified += 1
+        else:
+            not_bought += 1
+            if prediction == 0:
+                not_bought_and_identified += 1
+
+    return bought_and_identified/bought, not_bought_and_identified/not_bought
+    
 
 if __name__ == "__main__":
     main()
