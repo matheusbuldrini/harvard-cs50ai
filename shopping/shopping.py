@@ -59,7 +59,61 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-    raise NotImplementedError
+    evidence = []
+    labels = []
+
+    with open(filename) as f:
+        contents = f.read().splitlines()[1:]
+        for line in contents:
+            evidences = []
+            columns = line.split(',')
+            evidences.append(int(columns[0]))
+            evidences.append(float(columns[1]))
+            evidences.append(int(columns[2]))
+            evidences.append(float(columns[3]))
+            evidences.append(int(columns[4]))
+            evidences.append(float(columns[5]))
+            evidences.append(float(columns[6]))
+            evidences.append(float(columns[7]))
+            evidences.append(float(columns[8]))
+            evidences.append(float(columns[9]))
+            evidences.append(parse_month(columns[10]))
+            evidences.append(int(columns[11]))
+            evidences.append(int(columns[12]))
+            evidences.append(int(columns[13]))
+            evidences.append(int(columns[14]))
+            evidences.append(parse_visitor_type(columns[15]))
+            evidences.append(parse_bool(columns[16]))
+            
+            evidence.append(evidences)
+            labels.append(parse_bool(columns[17]))
+    
+    return evidence, labels
+
+
+def parse_month(month_str):
+    match month_str:
+        case "Jan": return 0
+        case "Feb": return 1
+        case "Mar": return 2
+        case "Apr": return 3
+        case "May": return 4
+        case "June": return 5
+        case "Jul": return 6
+        case "Aug": return 7
+        case "Sep": return 8
+        case "Oct": return 9
+        case "Nov": return 10
+        case "Dec": return 11
+        case _: raise ValueError("Invalid month " + month_str)
+
+
+def parse_visitor_type(visitor_type_str):
+    return 1 if visitor_type_str == "Returning_Visitor" else 0
+
+
+def parse_bool(bool_str):
+    return 1 if bool_str == "TRUE" else 0
 
 
 def train_model(evidence, labels):
